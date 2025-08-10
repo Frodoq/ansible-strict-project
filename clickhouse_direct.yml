@@ -1,0 +1,30 @@
+---
+- name: Install ClickHouse directly
+  hosts: clickhouse
+  tasks:
+    - name: Add ClickHouse repository key
+      shell: |
+        sudo apt-get install -y apt-transport-https ca-certificates dirmngr
+        sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv E0C56BD4
+        
+    - name: Add ClickHouse repository
+      shell: |
+        echo "deb https://packages.clickhouse.com/deb stable main" | sudo tee /etc/apt/sources.list.d/clickhouse.list
+        
+    - name: Wait for dpkg lock release
+      shell: |
+        while sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do
+          echo "Waiting for dpkg lock release..."
+          sleep 5
+        done
+        
+    - name: Update apt cache
+      shell: sudo apt-get update
+      
+    - name: Install ClickHouse server and client
+      shell: sudo apt-get install -y clickhouse-server clickhouse-client
+        
+    - name: Start ClickHouse service
+      shell: |
+        sudo service clickhouse-server start
+        sudo systemctl enable clickhouse-server

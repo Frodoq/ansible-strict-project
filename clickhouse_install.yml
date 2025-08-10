@@ -1,0 +1,29 @@
+---
+- name: Install ClickHouse
+  hosts: clickhouse
+  tasks:
+    - name: Add ClickHouse repository key
+      apt_key:
+        url: "https://clickhouse.com/static/ubuntu/GPG-KEY-clickhouse"
+        state: present
+      become: yes
+
+    - name: Add ClickHouse repository
+      apt_repository:
+        repo: "deb https://packages.clickhouse.com/deb stable main"
+        state: present
+      become: yes
+
+    - name: Install ClickHouse server
+      apt:
+        name: clickhouse-server
+        state: present
+        update_cache: yes
+      become: yes
+
+    - name: Start ClickHouse service
+      service:
+        name: clickhouse-server
+        state: started
+        enabled: yes
+      become: yes
